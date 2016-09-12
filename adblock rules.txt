@@ -1,0 +1,12 @@
+三、更多强效规则
+可选规则: CJX's Annoyance List，2015.2.4发布，CJX个人规则，过滤烦人的自我推广，并作为EasyPrivacy的补充。
+订阅组的标题:
+CJX's Annoyance List
+过滤规则列表位置:
+https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt
+
+可选规则: EasyPrivacy，Adblock Plus官方规则，禁止跟踪，保护隐私。
+订阅组的标题:
+EasyPrivacy
+过滤规则列表位置:
+https://easylist-downloads.adblockplus.org/easyprivacy.txt
