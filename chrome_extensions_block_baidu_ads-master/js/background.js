@@ -9,8 +9,8 @@
 				//console.log("document.readyState="+document.readyState)
 				//console.log("----match------ tabId = "+tabId)
 				chrome.tabs.executeScript(tabId,{file:"/js/block_ads.js",runAt:"document_end"});
-			} else if(tab.url.match('http://play.baidu.com')){
-				//chrome.tabs.executeScript(tabId,{file:"/js/block_play_ads.js",runAt:"document_end"});
+			} else if(tab.url.match('http://news.baidu.com')){
+				chrome.tabs.executeScript(tabId,{file:"/js/block_news_ads.js",runAt:"document_end"});
 			}
 		}
 		//console.log("----end--------------")
