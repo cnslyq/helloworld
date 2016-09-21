@@ -1,5 +1,12 @@
 echo off
 setlocal enabledelayedexpansion
+
+rem /**
+rem  *
+rem  * This script is used to deploy pbq in the local environment by entering the name.
+rem  *
+rem  */
+
 set project_list=project.properties
 set build_setup=build.properties
 set project_name=""

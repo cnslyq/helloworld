@@ -1,5 +1,14 @@
 echo off
 setlocal enabledelayedexpansion
+
+rem /**
+rem  *
+rem  * This script is used to deploy pbq to the DEV(10.1.110.22) environment.
+rem  * 
+rem  * Please set project list in project.properties before you execute the script.
+rem  *
+rem  */
+
 set project_list=project.properties
 set build_setup=build.properties
 set project_name=""

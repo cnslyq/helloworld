@@ -1,0 +1,77 @@
+	<div id="report-search-condition" class="row" style="">
+		<div class="report-search-condition-left">
+			<div class="row con-row" style="display: -webkit-box;">
+				<div class="condition-label">
+					<span class="report-font">日期：</span>
+				</div>
+				<div style="padding-left:10px;" id="cntmonth1_div">
+					<input type="text" id="cntdate" class="form-control input-sm purang-input purang-datapicker purang-datapicker-range report-control" placeholder="开始日期" readonly>
+				</div>
+				
+				<div style="padding-left:40px;">
+					<button id="searchbtn" type="button" class="btn btn-primary btn-sm purang-btn-sm-default"><span class="glyphicon glyphicon-search"></span>   查看报表</button>
+					<button id="excelbtn" type="button" class="btn btn-warning btn-sm purang-btn-sm-default"><span class="glyphicon glyphicon-download-alt"></span>   导出报表</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		var excelname = '$!excelname';
+		
+    	$(function(){
+	    	try {
+	    		$("#reportTitle").text(excelname);
+		    	
+	    		$(".purang-datapicker-range").datetimepicker({
+			        language:  'zh-CN',
+			        weekStart: 1,
+			        todayBtn:  1,
+					autoclose: 1,
+					todayHighlight: 1,
+					startView: 2,
+					minView: 2,
+					forceParse: 0,
+					format:	'yyyy-mm-dd'
+			    });
+				$(".purang-datapicker-range").datetimepicker("setValue", new Date());
+				
+				function getparameters(){
+					var parameters = "1=1";
+					var reportName = 'report_2015/eba/Eba_DayCheck_BillManage';
+					
+					parameters += "&reportName="+reportName;
+	    	    	parameters += "&cntdate="+$("#cntdate").val().replaceAll("-","");
+	    	    	
+	    	    	return parameters;
+				}
+				
+				$("#searchbtn").click(function(){
+	    	    	var parameters = getparameters();
+	    	    	if(!parameters) return;
+	    	    	console.log(reportPath+"?"+parameters+"&outputType=html");
+	    	    	$('iframe#myId').hide();
+	    	    	$("#loading").show();
+	    	    	resetIframeHeight();
+	    	    	$('iframe#myId').attr('src', reportPath+"?"+parameters+"&outputType=html&isexcel=1");
+	    	    });
+				$("#searchbtn").trigger("click");
+				
+				$("#excelbtn").click(function(){
+	    	    	var parameters = getparameters();
+	    	    	parameters += "&excelname="+excelname+"-"+$("#cntdate").val().replaceAll("-","");
+	    	    	$('iframe#myId').attr('src', reportPath+"?"+parameters+"&outputType=excel");
+	    	    });
+    	    } catch(err) {
+				alert(err);
+			}
+    	});
+		
+		function multiselect_selectAll(el) {
+		    $('option', el).each(function(element) {
+		      	el.multiselect('select', $(this).val());
+		    });
+		}
+    </script>
+  </body>
+</html>

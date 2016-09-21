@@ -1,0 +1,233 @@
+	<div id="report-search-condition" class="row" style="">
+		<div class="report-search-condition-left">
+			<div class="row con-row" style="display: -webkit-box;">
+			
+				<div class="condition-label" id="dept_label">
+					<span class="report-font">部门：</span>
+				</div>
+				<div id="dept_div">
+					<input id="deptSel" style="width: 100px;" class="form-control input-sm purang-input report-control" size="18" type="text" value="" onclick="showMenu(this,'menuContent');" readonly>
+				</div>
+				<div class="condition-label" id="emp_label">
+					<span class="report-font">员工：</span>
+				</div>
+				<div id="emp_div">
+					<select id="employee" class="reportSelect" style="width: 100px;">
+					</select>
+				</div>
+				<div class="condition-label" id="kpilist_label">
+					<span class="report-font">指标：</span>
+				</div>
+				<div id="kpilist_div">
+					<select id="kpilist" multiple="multiple">
+						<option value="初始申报量" selected>初始申报量</option>
+	                    <option value="调整申报量">调整申报量</option>
+	                </select>
+				</div>
+				<div class="condition-label" id="charttype_label">
+					<span class="report-font">图形：</span>
+				</div>
+				<div id="charttype_div">
+					<select id="charttype">
+	                    <option value="折线图">折线图</option>
+						<option value="柱状图">柱状图</option>
+						<option value="面积图">面积图</option>
+						<option value="散点图">散点图</option>
+						<option value="饼状图">饼状图</option>
+	                </select>
+				</div>
+				<div class="condition-label">
+					<span class="report-font">日期：</span>
+				</div>
+				<div style="padding-left:10px;" id="cntdate1_div">
+					<input type="text" id="startdate" class="form-control input-sm purang-input purang-datapicker purang-datapicker-range report-control" placeholder="开始日期" readonly>
+				</div>
+				<div style="padding-left:10px;" id="cntdate1_div">
+					<input type="text" id="enddate" class="form-control input-sm purang-input purang-datapicker purang-datapicker-range report-control" placeholder="结束日期" readonly>
+				</div> 
+				<div style="padding-left:40px;">
+					<button id="searchbtn" type="button" class="btn btn-primary btn-sm purang-btn-sm-default"><span class="glyphicon glyphicon-search"></span>   查看报表</button>
+					<button id="excelbtn" type="button" class="btn btn-warning btn-sm purang-btn-sm-default"><span class="glyphicon glyphicon-download-alt"></span>   导出报表</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="menuContent" class="menuContent" style="display:none; position: absolute;">
+		<ul id="deptTree" class="ztree purang-reporttree" style="margin-top:0;"></ul>
+	</div>	
+				
+	<script type="text/javascript">
+		var excelname = '$!excelname';
+		var deptSetting = {
+			check: {
+				enable: true,
+				chkStyle: "radio",
+				radioType: "all"
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				onCheck: onDeptCheck
+			}
+		};
+		
+		function onDeptCheck(e, treeId, treeNode) {
+			var deptObj = $("#deptSel");
+			deptObj.attr("value", treeNode.name);
+			deptObj.attr("path", treeNode.id);
+			if(treeNode.id!="10001") {
+				var sendInfo = {"deptpathlike": treeNode.id};
+				$.ajax({  
+	            	type: "post",//请求方式  
+	               	url: "/html/findstaffs.html",//发送请求地址  
+	               	data: {arg:JSON.stringify(sendInfo)},
+	               	dataType: "json",//设置返回数据的格式  
+	               	async:	false,
+	               	//请求成功后的回调函数 data为json格式  
+	               	success:function(data){  
+	                  	if(data.success == true) {
+	                  		$('#employee').html("").append($('<option value="">-请选择-</option>'));
+	                  		$.each(data.data,function(i, item) {
+	                  			$('#employee').append($('<option value="'+item.id+'">'+item.name+'</option>'));
+	                  		});
+	                  	} else {
+	    		            alert("查询部门失败！");
+	                  	};  
+	              	},  
+	              	//请求出错的处理  
+	              	error:function(){  
+			            alert("查询部门请求出错！");
+	              	}  
+	           	}); 
+           	} else {
+           		$('#employee').html("");
+           	}
+		}
+
+		function showMenu(obj, divid) {
+			var that = $(obj);
+			var cityOffset = that.offset();
+			$("#"+divid).css({left:cityOffset.left + "px", top:cityOffset.top + that.outerHeight() + "px"}).slideDown("fast");
+			if(divid == 'menuContent') {
+				$("body").bind("mousedown", onBodyDown);
+			} else if(divid == 'menuContent_region') {
+				$("body").bind("mousedown", onBodyDown_region);
+			}
+		}
+		function hideMenu() {
+			$("#menuContent").fadeOut("fast");
+			$("body").unbind("mousedown", onBodyDown);
+		}
+		function onBodyDown(event) {
+			if (!(event.target.id == "menuBtn" || event.target.id == "regionSel" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+				hideMenu();
+			}
+		}
+    	
+    	$(function(){
+    		$('#kpilist').multiselect();
+    		$('#charttype').multiselect();
+	    	try {
+	    		var initpaths = 10001;
+	    		var userid = '';
+	    		var orgid = '';
+		    	var deptTreeObj;
+				var sendInfo = {"path":initpaths,"businesstype":"1","isExternal":"1"};
+				$.ajax({  
+			            	type: "post",//请求方式  
+			               	url: "/html/finddepartments.html",//发送请求地址  
+			               	data: {arg:JSON.stringify(sendInfo)},
+			               	dataType: "json",//设置返回数据的格式  
+			               	async:	false,
+			               	//请求成功后的回调函数 data为json格式  
+			               	success:function(data){  
+			                  	if(data.success == true) {
+			                  		var deptNodes = [];
+			                  		$.each(data.data,function(i, item) {
+			                  			var idArr = item.path.split("_");
+			                  			var pId = "";
+			                  			for(var i=0;i<idArr.length-1;i++) {
+			                  				pId += (i==0?"":"_")+idArr[i];
+			                  			}
+			                  			var node = {id:item.path,pId:pId,name:item.name};
+			                  			deptNodes.push(node);
+			                  		});
+			                  		$.fn.zTree.init($("#deptTree"), deptSetting, deptNodes);
+			                  		deptTreeObj = $.fn.zTree.getZTreeObj("deptTree");
+			                  		var rootNode = deptTreeObj.getNodes()[0];
+			                  		deptTreeObj.checkNode(rootNode);
+			                  		var deptObj = $("#deptSel");
+									deptObj.attr("value", rootNode.name);
+									deptObj.attr("path", rootNode.id);
+			                  	} else {
+			    		            alert("查询部门失败！");
+			                  	};  
+			              	},  
+			              	//请求出错的处理  
+			              	error:function(){  
+					            alert("查询部门请求出错！");
+			              	}  
+			      }); 
+		        
+	    		$(".purang-datapicker-range").datetimepicker({
+			        language:  'zh-CN',
+			        weekStart: 1,
+			        todayBtn:  1,
+					autoclose: 1,
+					todayHighlight: 1,
+					startView: 2,
+					minView: 2,
+					forceParse: 0,
+					format:	'yyyy-mm-dd'
+			    });
+				$(".purang-datapicker-range").datetimepicker("setValue", new Date());
+				
+				function getparameters(){
+					if($("#kpilist").val()==null || $("#kpilist").val()==""){
+						alert("指标不能为空!");
+						return;
+					}
+					var parameters = "1=1";
+					var reportName = 'newchart2016/ChartReport_Dynamic_KPI';
+					parameters += "&reportName="+reportName;
+					var deptTreeObj = $.fn.zTree.getZTreeObj("deptTree");
+					var nodes = deptTreeObj.getCheckedNodes(true);
+					$.each(nodes, function(i, node){
+						parameters += "&deptpath="+node.id;
+					});
+					parameters += "&userid="+($("#employee").val()==null?"":$("#employee").val());
+					parameters += "&kpilist="+($("#kpilist").val()==null?"":$("#kpilist").val());
+					parameters += "&charttype="+($("#charttype").val()==null?"":$("#charttype").val());
+					parameters += "&startdate="+$("#startdate").val().replaceAll("-","");
+	    	    	parameters += "&enddate="+$("#enddate").val().replaceAll("-","");
+	    	    	return parameters;
+				}
+				
+				$("#searchbtn").click(function(){
+	    	    	var parameters = getparameters();
+	    	    	if(!parameters) return;
+	    	    	console.log(reportPath+"?"+parameters+"&outputType=html");
+	    	    	$('iframe#myId').hide();
+	    	    	$("#loading").show();
+	    	    	resetIframeHeight();
+	    	    	$('iframe#myId').attr('src', reportPath+"?"+parameters+"&outputType=html&isexcel=1");
+	    	    });
+				$("#searchbtn").trigger("click");
+				
+				$("#excelbtn").click(function(){
+	    	    	var parameters = getparameters();
+	    	    	parameters += "&excelname="+excelname;
+	    	    	$('iframe#myId').attr('src', reportPath+"?"+parameters+"&outputType=excel");
+	    	    });
+    	    } catch(err) {
+				alert(err);
+			}
+    	});
+    	
+    
+    </script>
+  </body>
+</html>

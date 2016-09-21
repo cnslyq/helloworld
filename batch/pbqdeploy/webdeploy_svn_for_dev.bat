@@ -1,8 +1,17 @@
 echo off
 setlocal enabledelayedexpansion
+
+rem /**
+rem  *
+rem  * This script is used to deploy webproxy files(vm & js) to the DEV(10.1.110.24) environment.
+rem  *
+rem  * It will compare the diff files between 2 versions and deploy the target version file.
+rem  *
+rem  */
+
 set build_setup=build.properties
-set from_desc=Please input from version : 
-set to_desc=Please input to version : 
+set from_desc=Please input old version : 
+set to_desc=Please input target version : 
 set old_from_version=-1
 set old_to_version=-1
 
@@ -23,14 +32,14 @@ echo;
 echo *************************************************************************
 echo;
 
-rem set from_version=57691
-rem set to_version=57684
+rem set from_version=57684
+rem set to_version=57795
 if %old_from_version% neq -1 (
-	set from_desc="Please input from version (%old_from_version%) : "
-	set to_desc="Please input to version (%old_to_version%) : "
+	set from_desc="Please input old version (%old_from_version%) : "
+	set to_desc="Please input target version (%old_to_version%) : "
 ) else (
-	set from_desc="Please input from version : "
-	set to_desc="Please input to version : "
+	set from_desc="Please input old version : "
+	set to_desc="Please input target version : "
 )
 set /p from_version=%from_desc%
 if %from_version% equ 0 exit
@@ -39,7 +48,7 @@ if %to_version% equ 0 exit
 if %from_version% equ "" if %old_from_version% neq -1 set from_version=%old_from_version%
 if %to_version% equ "" if %old_to_version% neq -1 set to_version=%old_to_version%
 
-svn diff --summarize -r %from_version%:%to_version% > webdeploy_files.txt
+svn diff --summarize -r %from_version%:%to_version% > %webdeploy_file_list%
 if %errorlevel% neq 0 (
 	if %old_from_version% neq -1 (
 		set from_version=%old_from_version%
@@ -52,48 +61,25 @@ if %errorlevel% neq 0 (
 	set old_to_version=%to_version%
 )
 
+rem svn export
+call %~dp0\webdeploy_svn_export %to_version%
+
 echo;
-echo The below files will be moved to 10.1.110.24 ^^!^^!
+echo SVN Export File List : 
 echo;
-for /f "tokens=1,2 delims= " %%i in (webdeploy_files.txt) do (
+for /f "tokens=1,2 delims= " %%i in (%webdeploy_file_list%) do (
 	echo   %%j
 )
 echo;
-set /p confirm_opt=Are you sure ? 
+set /p confirm_opt=The above files will be moved. Are you sure ? 
 if %confirm_opt% neq yes goto inputno
 
-for /f "tokens=1,2 delims= " %%i in (webdeploy_files.txt) do (
+rem move files to 24
+for /f "tokens=1,2 delims= " %%i in (%webdeploy_file_list%) do (
 	echo;
-	set full_name=%webproxy_root_path%\%%j
-
-	rem check file type in (vm, js)
-	call :getextension !full_name!
-	if !file_suffix! equ .vm (set /a m=1) else set /a m=0
-	if !file_suffix! equ .js (set /a n=1) else set /a n=0
-	
-	set /a x=m "|" n
-	if !x! equ 1 (
-		call :getpath !full_name!
-		rem pscp -pw purang D:\purang\SVN\04source\webproxy\src\main\webapp\template\report\reportview.vm root@10.1.110.24:/opt/tomcat/webapps/ROOT/template/report/
-		pscp -pw %dev_user_pwd% !full_name! %dev_user_id%@%dev_tomcat_server_ip%:%dev_tomcat_deploy_path%!file_path!
-	) else (
-		call :getname !full_name!
-		echo !file_name! has been ignored.
-	)
+	rem set full_name=%webproxy_root_path%\%%j
+	set full_name=%~dp0%tempdir%\%%j
+	call %~dp0\webdeploy_pscp.bat !full_name! %~dp0%tempdir%
 )
 
 goto inputno
-
-:getextension
-set file_suffix=%~x1
-goto :EOF
-
-:getpath
-set file_path=%~dp1
-set file_path=!file_path:%webproxy_root_path%%webproxy_web_path%=!
-set file_path=!file_path:\=/!
-goto :EOF
-
-:getname
-set file_name=%~nx1
-goto :EOF

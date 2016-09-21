@@ -1,5 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
+
+rem /**
+rem  *
+rem  * This script is used to deploy all the pbqs in the local environment.
+rem  * 
+rem  * Please be noticed, it's not recommended to be used as it is likely to throw an exception.
+rem  *
+rem  */
+
 set build_setup=build.properties
 
 echo;
