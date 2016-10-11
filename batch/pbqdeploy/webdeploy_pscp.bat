@@ -1,6 +1,6 @@
 rem /**
 rem  *
-rem  * This script is used to deploy files to DEV(10.1.110.24).
+rem  * This script is used to deploy files to multiplicate environments.
 rem  * 
 rem  * Input parameters,
 rem  * %1 full name, e.g. D:\purang\SVN\04source\webproxy\src\main\webapp\template\report\eba_new\Eba_DayCheck_BillManage_BaoLi.vm
@@ -19,12 +19,12 @@ set /a x=m "|" n
 if %x% equ 1 (
 	call :getpath %full_name%
 	rem check path exists
-	for /f "delims=" %%i in ('plink -pw %dev_user_pwd% %dev_user_id%@%dev_tomcat_server_ip% "ls %dev_tomcat_deploy_path%!file_path!;echo $?"') do (set pbqnumber=%%i)
+	for /f "delims=" %%i in ('plink -pw !%env%_user_pwd! !%env%_user_id!@!%env%_tomcat_server_ip! "ls !%env%_tomcat_deploy_path!!file_path!;echo $?"') do (set pbqnumber=%%i)
 	if !pbqnumber! equ 2 (
-		plink -pw %dev_user_pwd% %dev_user_id%@%dev_tomcat_server_ip% "mkdir %dev_tomcat_deploy_path%!file_path!"
+		plink -pw !%env%_user_pwd! !%env%_user_id!@!%env%_tomcat_server_ip! "mkdir !%env%_tomcat_deploy_path!!file_path!"
 	)
 	rem pscp -pw purang D:\purang\SVN\04source\webproxy\src\main\webapp\template\report\reportview.vm root@10.1.110.24:/opt/tomcat/webapps/ROOT/template/report/
-	pscp -pw %dev_user_pwd% %full_name% %dev_user_id%@%dev_tomcat_server_ip%:%dev_tomcat_deploy_path%!file_path!
+	pscp -pw !%env%_user_pwd! %full_name% !%env%_user_id!@!%env%_tomcat_server_ip!:!%env%_tomcat_deploy_path!!file_path!
 ) else (
 	call :getname %full_name%
 	echo !file_name! has been ignored.
