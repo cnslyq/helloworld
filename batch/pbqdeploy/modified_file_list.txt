@@ -1,3 +1,0 @@
-src/main/webapp/template/report/eba_new/Eba_DayCheck_BillManage_BaoLi.vm
-src/main/webapp/template/report/reportview.vm
-src/main/java/com/purang/web/template/ReportVelocityController.java

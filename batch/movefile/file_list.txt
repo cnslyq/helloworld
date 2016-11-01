@@ -1,6 +1,0 @@
-webproxy\src\main\java\com\purang\web\template\StoreController.java
-webproxy\src\main\webapp\js\stock\billstock.js
-webproxy\src\main\webapp\template\billstock\cancleStock.vm
-webproxy\src\main\webapp\template\billstock\cancleStockUpdate.vm
-webproxy\src\main\webapp\template\billstock\cancleView.vm
-webproxy\src\main\webapp\template\billstock\listebabill.vm
